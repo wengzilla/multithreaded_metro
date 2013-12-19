@@ -1,0 +1,468 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>CMSC 330, Spring 2009 - Project 5 </title>
+
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <link href="style.css" rel="stylesheet" type="text/css"></head><body>
+
+<table cellpadding="8" cellspacing="0" width="100%">
+<tbody><tr>
+<td valign="top" width="15%">
+<table class="menu" border="0" cellpadding="2" cellspacing="2" width="100%">
+  <tbody>
+      <tr><td><a href="http://www.cs.umd.edu/class/spring2009/cmsc330/">Home</a></td></tr>
+      <tr><td><a href="http://www.cs.umd.edu/class/spring2009/cmsc330/syllabus.shtml">Syllabus</a></td></tr>
+      <tr><td><a href="http://www.cs.umd.edu/class/spring2009/cmsc330/schedule.shtml">Schedule<br> <i>(w/ links to handouts)</i></a></td></tr>
+      <tr><td><a href="http://www.cs.umd.edu/class/spring2009/cmsc330/resources.shtml">Resources</a></td></tr>
+      <tr><td><a href="https://forum.cs.umd.edu/forumdisplay.php?f=134">Forum</a></td></tr>
+      <tr><td><a href="https://submit.cs.umd.edu/">Submit Server</a></td></tr>
+      <tr><td><a href="https://grades.cs.umd.edu/">Grades Server</a></td></tr>
+  </tbody>
+</table>
+</td><td valign="top" width="85%">
+
+<div class="header">
+<center>
+<h2>CMSC 330, Spring 2009</h2>
+<h3>Organization of Programming Languages</h3>
+</center>
+</div>
+
+
+<h1 class="title">Project 5 - Multithreaded Metro Simulation </h1>
+<center>
+Due May 6th, 2009<br>
+11:59:59pm
+</center>
+
+<h2>Introduction</h2>
+
+<p>
+In this project, you will develop a multi-threaded Ruby program that
+simulates the Washington Metro.  You will also write code to verify
+the feasibility of simulation outputs.
+
+
+<h2>Getting Started</h2>
+
+Downloading
+<ul>
+<li> Download the archive file
+<a href="http://www.cs.umd.edu/class/spring2009/cmsc330/p5/p5.zip">p5.zip</a>
+and extract its contents.
+</ul>
+
+<p>
+Along with files used to make direct submissions to the
+submit server (<a href="submit.jar">submit.jar</a>,
+<a href=".submit">.submit</a> ,
+<a href="submit.rb">submit.rb</a>), you will
+find the following project files:
+</p><ul>
+<li>Your Ruby program
+<ul>
+<li><a href="metro.rb">metro.rb</a>
+</ul>
+</li><li>Public tests
+<ul>
+<li> <a href="public_simulate00.rb">public_simulate00.rb</a>
+<li> <a href="public_simulate01.rb">public_simulate01.rb</a>
+<li> <a href="public_verify00.rb">public_verify00.rb</a>
+<li> <a href="public_verify01.rb">public_verify01.rb</a>
+<li> <a href="public_verify02.rb">public_verify02.rb</a>
+<li> <a href="public_verify03.rb">public_verify03.rb</a>
+</ul>
+<li>Inputs for verify tests
+<ul>
+<li> <a href="public_verify00.in">public_verify00.in</a>
+<li> <a href="public_verify01.in">public_verify01.in</a>
+<li> <a href="public_verify02.in">public_verify02.in</a>
+<li> <a href="public_verify03.in">public_verify03.in</a>
+</ul>
+<li>Possible simulation outputs 
+<ul>
+<li> For public_simulate00.rb
+<ul>
+<li> <a href="public_simulate00a.out">public_simulate00a.out</a>
+<li> <a href="public_simulate00b.out">public_simulate00b.out</a>
+<li> <a href="public_simulate00c.out">public_simulate00c.out</a>
+</ul>
+<li> For public_simulate01.rb
+<ul>
+<li> <a href="public_simulate01a.out">public_simulate01a.out</a>
+<li> <a href="public_simulate01b.out">public_simulate01b.out</a>
+<li> <a href="public_simulate01c.out">public_simulate01c.out</a>
+</ul>
+</ul>
+<li>Ruby script to run public tests
+<ul>
+<li><a href="goTest.rb">goTest.rb</a>
+</ul>
+</li></ul>
+
+<h2>Project Description</h2>
+
+<h3>Part 1:  Metro Simulation</h3>
+
+<p>
+We will begin by describing the simulation; however, we suggest that
+you actually start with the simulation verifier described below.
+
+<p>
+In the simulation, there will be metro trains, each of which runs on a
+particular line, and people wanting to travel on the metro, each with
+an initial and final destination.  We will invoke your simulation with
+the following code:
+
+<pre>
+require "metro.rb"
+simulate(input)
+</pre>
+
+<p>
+where <tt>input</tt> is a Ruby array describing the people's paths
+through the system (see below).  Here is how the simulation should
+work:
+
+<ul>
+<li>The file <tt>metro.rb</tt> defines (a subset
+of) the stops of the five metro lines (these are the only stops we
+will use for this project).  For example, here are the stops on the
+red line:
+<pre>
+$red_line = [
+  "Glenmont",
+  "Silver Spring",
+  "Fort Totten",
+  "Union Station",
+  "Gallery Place",
+  "Metro Center",
+  "Bethesda",
+  "Shady Grove"
+]
+</pre>
+
+<li>During the simulation, exactly one train will run along each
+line.  At the begining of the simulation, trains are at the initial
+stop on their line (e.g., <tt>Glenmont</tt> for the red line).  They
+move sequentially forward along the line, and then when they reach the
+end, they move sequentially backward along the line, until they reach
+the beginning, and then they continue indefinitely back and forth.
+
+<p>
+
+<li>Each train should be represented by its own thread.  (Thus, since
+there are five lines, your simulation will create at least five
+threads.)
+
+<p>
+
+<li>Each train waits for 0.1 second at its current stop, and then moves
+to the next station.
+
+<p>
+
+<li>At most one train may be at a station at a time.  Thus, at
+stations where two lines intersect, if two trains happen to arrive at
+the same time, one will wait (i.e., the thread representing it will
+block) until the station is clear.
+
+<p>
+
+<li>Trains can carry an unlimited number of passengers.
+
+<p>
+
+<li>The file <tt>metro.rb</tt> includes a sample array input describing the
+actions of people taking the metro.  In this array, each entry
+describes a person.  The entry is itself an array, listing the
+person's name followed by
+stations the person wants to visit, in order.  For example, here is
+a sample input:
+<pre>
+$sample_input = [
+  ["Alice", "College Park", "Gallery Place"],
+  ["Charlie", "Union Station", "Fort Totten", "College Park"]
+]
+</pre>
+This file lists the intended paths of two people.  Alice
+starts at College Park and wants to take the train to Gallery Place.
+Charlie starts at Union Station, takes the train to Fort
+Totten, and then takes the train to College Park.
+<p>  
+
+<p>
+
+<li>Each person in the simulation should also be represented by their
+own thread.  Thus, if you are simulating n people, there should be
+5+n+1 threads in the system (5 for the trains, n for the people,
+1 for the main thread).
+
+<p>
+
+<li>At the start of the simulation, each person begins at the initial
+station on their path.  They wait (i.e., the thread representing them
+blocks) until the right train arrives.  At that point, they board the train.
+When the train arrives at their next destination, they disembark and
+wait for the train they want to arrive, or exit (i.e., their thread
+exits) if they have arrived at their final destination.
+
+<p>
+
+<li>Notice that the list of stations for each person does not tell you
+what line they want to take.  You'll need to compute that based on
+the starting and ending destination for each segment.  Sometimes there
+may be more than one valid line, in which case the person can take
+either.
+
+<p>
+
+<li>It is possible, due to thread scheduling, that a person might miss
+their train or might miss their stop.  In that
+case, they remain either in the station, or on the train,
+respectively, until they can get off at their stop.
+
+<p>
+
+<li>You may assume that all passenger travel plans are valid.
+For example, there is no direct line from College Park to
+Vienna, so you can assume no person will try to go from one to the
+other without explicitly listing an intermediate destination.  You can
+assume all the destinations listed for a passenger are valid stations.
+
+<p>
+
+<li>The simulation ends when all people have arrived at their final
+stops.  To achieve this, in the main thread you'll probably do a
+<tt>join</tt> on all the threads representing the people.  Notice
+that it is legal if trains continue running for a while even after all 
+passengers have arrived.  
+
+<p>
+
+<li>
+No passengers should be able to board a train after it has left
+the station.  For example, a train thread should not print out 
+<tt>Train A leaving X</tt> before passenger threads say, 
+<tt>M boarding train A at X</tt>.</li>
+
+<p>
+
+<li>You should set <tt>Thread.abort_on_exception = true</tt> in your
+code, to avoid hiding errors in threads.  
+
+<p>
+
+<li>There is no requirement on how many monitors you use for this 
+project---just that you use proper synchronization</li>
+
+</ul>
+
+</ul>
+
+<p>
+In order to see what's going on during your simulation, your program
+must print out various lines of text as actions occur.  Here are the
+messages you must print:
+
+<ul>
+<li>When a train enters a station, you should print "<tt>Train c
+entering s</tt>" where <tt>c</tt> is the train color, one of
+<tt>red</tt>, <tt>green</tt>, <tt>yellow</tt>, <tt>orange</tt>, or
+<tt>blue</tt>, and <tt>s</tt> is the station name, e.g., <tt>College Park</tt>.
+  Trains should also print this message when they
+materialize at the initial stations at the beginning of the simulation.
+
+<p>
+
+<li>When a train leaves a station, you should print "<tt>Train c leaving
+s</tt>", similarly to above
+
+<p>
+
+<li>When a person boards a train, you should print "<tt>p boarding train
+c at s</tt>", where <tt>p</tt> is the person's name, <tt>c</tt> is the
+train color, and <tt>s</tt> is the station name.  For example,
+"<tt>Alice boarding train green at College Park</tt>".
+
+<p>
+
+<li>When a person departs a train, you should print "<tt>p leaving train
+c at s</tt>"
+
+<p>
+
+<li>Do not include quotes in the output strings; they're shown above
+just to be clear what is in the string and what is excluded.
+</ul>
+
+There should be no other output from the simulation
+<p>
+
+A sample output could then begin with something like the following:
+<pre>
+      Train green entering Greenbelt
+      Train blue entering Largo Town Center
+      Train orange entering New Carrolton
+      Train blue leaving Largo Town Center
+      Train yellow entering Fort Totten
+      Train red entering Glenmont
+      Train orange leaving New Carrolton
+      ...
+</pre>
+
+<p>
+In order to make sure the output makes sense, you
+must do the following:
+<ul>
+<li>Only print out the above statements while you are still holding a
+lock.
+
+<p>
+
+<li>Immediately after printing, and before you release the lock, call
+$stdout.flush to flush standard output.
+</ul>
+
+Following the two rules above should ensure that if you build the simulation
+correctly, your simulation output will be valid.  Otherwise, you might
+get strange interleavings of output messages that look incorrect even
+if your simulation code is actually correct.
+
+<p>
+You must use mutual exclusion to ensure your simulation is valid.  We
+will manually look at your submitted code to check that you've used
+locking correctly.
+
+<h3>Part 2:  Simulation Verifier</h3>
+
+<p>
+The simulation above can clearly have many different behaviors,
+depending on the scheduler.  However, there are certain restrictions
+on the simulation output, e.g., people must get on trains when those
+trains are at the station the person is at.
+For this part of the project, you will write a Ruby program
+that takes traces gathered from a simulation (as from part 2) and
+checks whether they are valid.  We suggest you do this part first,
+since it might help you debug your simulation.
+
+<p>
+We will invoke your verifier for this part as
+<pre>
+require "metro.rb"
+result = verify(input, output)
+</pre>
+
+<p>
+Here <tt>input</tt> is the description of the people in the
+simulation.  <tt>output</tt> is the output of the simulation, which is
+an array, each line of which contains one line from the simulation
+output, in order.  There are no newlines at the end of each line (we
+will remove them with <tt>chomp</tt>).  Your <tt>verify</tt> function
+should return <tt>true</tt> (or a non-<tt>false</tt>, non-<tt>nil</tt> value) if the
+<tt>output</tt> is valid for the <tt>input</tt>, and <tt>false</tt> or
+<tt>nil</tt> otherwise.
+
+In particular, you should be sure to check for the following:
+<ul>
+<li>Check that all the output messages are formatted exactly as 
+specified
+<li>Ensure that trains start at their initial station, and then move
+forward and backward along the stations on their metro line
+<li>Make sure trains enter a station before they leave it
+<li>Make sure two trains are not at the same station at the same time
+<li>Make sure that each person follows their path as given in
+<tt>input</tt>
+<li>Make sure people only board and leave a train at a station after
+that train has entered the station, but before it leaves the station
+<li>Make sure all people reach their destinations in the
+simulation
+<li>Make sure no extra people move around on the trains
+</ul>
+
+<h2>Submission</h2>
+
+You can submit your project in two ways:
+
+<ul>
+
+<li>
+Submit your file metro.rb directly to the
+<a href="http://submit.cs.umd.edu/">submit server</a>
+by clicking on the submit link in the column "web submission".
+
+<p>
+
+<img src="submit1.jpg">
+</p><p>
+
+Next, use the submit dialog to submit your metro.rb file.
+
+</p><p>
+<img src="submit2.jpg">
+</p><p>
+
+Select your file using the "Browse" button,
+then press the "Submit project!" button.
+
+</p><p>
+</p></li><li>
+
+</li><li>
+Submit directly by executing a Java program on a computer
+with Java and network access.  Use the submit.jar file
+from the archive 
+<a href="http://www.cs.umd.edu/class/spring2009/cmsc330/p5/p5.zip">p5.zip</a>,
+To submit, go to the directory containing your project, then either
+execute submit.rb or type the following command directly:
+<p>
+
+</p><center>
+<tt>
+java -jar submit.jar
+</tt>
+</center>
+<p>
+
+You will be asked to enter your class account and password, then
+all files in the directory (and its subdirectories) will be
+put in a jar file and submitted to the submit server.
+If your submission is successful you will see the message:
+</p><p> 
+
+</p><center>
+<tt> Successful submission #<submission_number> received for project 5
+</submission_number></tt>
+</center>
+<p>
+
+</p></li></ul>
+
+<h2>Academic Integrity</h2>
+
+<p>
+The Campus Senate has adopted a policy asking students to include the
+following statement on each assignment in every course: "I pledge on
+my honor that I have not given or received any unauthorized assistance
+on this assignment."  Consequently your program is requested to
+contain this pledge in a comment near the top.
+
+<p>
+Please <b>carefully read</b> the academic honesty section of the
+course syllabus.  <b>Any evidence</b> of impermissible cooperation on
+projects, use of disallowed materials or resources, or unauthorized
+use of computer accounts, <b>will be submitted</b> to the Student
+Honor Council, which could result in an XF for the course, or
+suspension or expulsion from the University.  Be sure you understand
+what you are and what you are not permitted to do in regards to
+academic integrity when it comes to project assignments.  These
+policies apply to all students, and the Student Honor Council does not
+consider lack of knowledge of the policies to be a defense for
+violating them.  Full information is found in the course
+syllabus---please review it at this time.
+
+</td>
+</table>
+
+</body>
+</html>
+

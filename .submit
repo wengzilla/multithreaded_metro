@@ -1,0 +1,17 @@
+#
+# The projectNumber must match exactly the projectNumber you specified when
+# creating/updating the project.  Please make sure to use the projectNumber
+# 
+projectNumber=5
+#
+# The submitURL is below and will be the same all semester for all courses
+#
+submitURL=https://marmoset1.umiacs.umd.edu:8443/eclipse/SubmitProjectViaEclipse
+#
+# The semester is below and will be the same all semester for all courses
+#
+semester=Spring 2009
+#
+# The courseName must match your courseName exactly
+#
+courseName=CMSC330-1
