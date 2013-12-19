@@ -27,13 +27,21 @@ class Verifier
   end
 
   def verify
-    verify_all_entering_and_leaving(output) &&
-      verify_all_station_order(output) &&
-      verify_no_train_overlap(output) &&
-      verify_all_people_follow_path(input, output) &&
-      verify_boarding_and_leaving(output) &&
-      verify_no_extra_people(input, output) &&
-      verify_no_extra_trains(output)
+    puts "#{verify_all_entering_and_leaving} &&
+      #{verify_all_station_order} &&
+      #{verify_no_train_overlap} &&
+      #{verify_all_people_follow_path} &&
+      #{verify_boarding_and_leaving} &&
+      #{verify_no_extra_people} &&
+      #{verify_no_extra_trains}"
+
+    verify_all_entering_and_leaving &&
+      verify_all_station_order &&
+      verify_no_train_overlap &&
+      verify_all_people_follow_path &&
+      verify_boarding_and_leaving &&
+      verify_no_extra_people &&
+      verify_no_extra_trains
   end
 
   # [{:color => "blue", :action => "entering", :station => "Largo Town Center"}]
@@ -105,9 +113,13 @@ class Verifier
     stations.all? do |station|
       filtered_output = filter_output_by_station(station)
 
-      filtered_output.each_with_index.all? do |hash, index|
+      result = filtered_output.each_with_index.all? do |hash, index|
         hash[:action] == ACTIONS[index % 2]
       end
+
+      puts filtered_output if !result
+
+      result
     end
   end
 

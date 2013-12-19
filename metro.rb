@@ -6,6 +6,8 @@
 ###############################################################################
 
 require "monitor"
+require "utils.rb"
+require "simulator.rb"
 require "verifier.rb"
 
 Thread.abort_on_exception = true   # abort all threads if Exception thrown
@@ -53,7 +55,7 @@ $sample_out = [ "Train green entering Greenbelt",
 #----------------------------------------------------------------
 
 def simulate(input)
-  puts "Train red entering Glenmont" 
+  Simulator.new(input).run
 end
 
 # simulate($sample_input)
@@ -66,4 +68,15 @@ def verify(input, output)
   Verifier.new(input, output).verify
 end
 
-puts verify($sample_input, $sample_out)
+orig_std_out = STDOUT.clone
+STDOUT.reopen("simulator_output.txt", "w")
+
+input = [ ["Alice", "College Park", "Gallery Place"], ["Charlie", "Union Station", "Fort Totten", "College Park"]]
+simulate(input)
+
+STDOUT.reopen(orig_std_out)
+
+output = read_output("simulator_output.txt")
+verify(input, output)
+
+puts "DONE"
