@@ -10,6 +10,7 @@ class Simulator
     @train_threads = []
     @people_threads = []
     @current_stations = {}
+    @lock = Mutex.new
   end
 
   def parsed_input
@@ -20,24 +21,17 @@ class Simulator
   end
 
   def run
-    # mutex = Mutex.new
-    # cv = ConditionVariable.new
-
     COLORS.each do |c|
       self.train_threads << Thread.new(c) do |color|
         train = Train.new(color)
         while true do
           sleep(0.1)
-          # mutex.synchronize do 
-            if current_stations.values.include?(train.next_station)
-              # puts "The #{color} train can't pull into #{train.next_station}. There's a train at that station!"
-              nil
-            else
-              # cv.wait(mutex)
+          @lock.synchronize do
+            current_stations[color] = nil
+            if !current_stations.values.include?(train.next_station)
               current_stations[color] = train.next!
-              # cv.signal
             end
-          # end
+          end
         end
       end
     end
